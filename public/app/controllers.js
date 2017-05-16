@@ -40,28 +40,32 @@ angular.module('RecipeCtrls', ['RecipeServices'])
             });
         };
     }])
-    .controller('NavCtrl', ['$scope', 'Auth', function($scope, Auth) {
+    .controller('NavCtrl', ['$scope', 'Auth', '$state', 'Alerts', function($scope, Auth, $state, Alerts) {
         $scope.Auth = Auth;
         $scope.logout = function() {
             Auth.removeToken();
+            Alerts.add('success', 'You logged out');
+            $state.reload();
             console.log('My Token:', Auth.getToken());
         }
     }])
-    .controller('SignupCtrl', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    .controller('SignupCtrl', ['$scope', '$http', '$location', 'Alerts', function($scope, $http, $location, Alerts) {
         $scope.user = {
             email: '',
             password: ''
         };
         $scope.userSignup = function() {
             $http.post('/api/users', $scope.user).then(function success(res) {
+                    Alerts.add('success', 'You signed up');
                     $location.path('/');
                 },
                 function error(res) {
+                    Alerts.add('danger', 'Error. Please see console');
                     console.log(res);
                 });
-        };
+        }
     }])
-    .controller('LoginCtrl', ['$scope', '$http', '$location', 'Auth', function($scope, $http, $location, Auth) {
+    .controller('LoginCtrl', ['$scope', '$http', '$location', 'Auth', 'Alerts', function($scope, $http, $location, Auth, Alerts) {
         $scope.user = {
             email: '',
             password: ''
@@ -69,10 +73,15 @@ angular.module('RecipeCtrls', ['RecipeServices'])
         $scope.userLogin = function() {
             $http.post('/api/auth', $scope.user).then(function success(res) {
                 Auth.saveToken(res.data.token);
+                Alerts.add('success', 'You logged in');
                 console.log('Token is', res.data.token);
                 $location.path('/');
             }, function error(res) {
+                Alerts.add('danger', 'Incorrect email/password');
                 console.log(res);
             })
-        };
+        }
+    }])
+    .controller('AlertCtrl', ['$scope', 'Alerts', function($scope, Alerts) {
+        $scope.Alerts = Alerts;
     }]);
